@@ -1,0 +1,511 @@
+import { useMemo, useState } from "react";
+
+export default function MedicalDepartmentWebsite() {
+  const inviteUrl = "https://discord.gg/Y3DUXufKn";
+
+  const pages = [
+    { id: "home", label: "Home", icon: "🏥" },
+    { id: "channels", label: "Channels", icon: "📚" },
+    { id: "crops", label: "Crops", icon: "🌿" },
+    { id: "medical-reports", label: "Medical Reports", icon: "📝" },
+    { id: "psychology-reports", label: "Psychology Reports", icon: "🧠" },
+    { id: "prices", label: "Prices", icon: "💵" },
+    { id: "storage-logs", label: "Storage Logs", icon: "📦" },
+    { id: "death-records", label: "Death Records", icon: "⚰️" },
+  ];
+
+  const [activePage, setActivePage] = useState("home");
+
+  const activeTitle = useMemo(() => {
+    return pages.find((page) => page.id === activePage)?.label || "Home";
+  }, [activePage]);
+
+  return (
+    <main className="min-h-screen bg-stone-950 text-stone-100">
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(185,28,28,0.28),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(22,163,74,0.18),_transparent_35%)]">
+        <Header inviteUrl={inviteUrl} />
+
+        <section className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[290px_1fr] lg:px-8">
+          <aside className="rounded-[2rem] border border-white/10 bg-black/35 p-4 shadow-2xl backdrop-blur">
+            <div className="mb-4 rounded-3xl border border-red-400/20 bg-red-950/30 p-5">
+              <p className="text-xs uppercase tracking-[0.3em] text-red-200">Department Portal</p>
+              <h2 className="mt-2 text-2xl font-black text-white">Medical HQ</h2>
+              <p className="mt-2 text-sm leading-6 text-stone-300">
+                Reports, logs, records, prices, and important medical channels in one organized place.
+              </p>
+            </div>
+
+            <nav className="grid gap-2">
+              {pages.map((page) => (
+                <button
+                  key={page.id}
+                  onClick={() => setActivePage(page.id)}
+                  className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition ${
+                    activePage === page.id
+                      ? "bg-red-600 text-white shadow-lg shadow-red-900/30"
+                      : "bg-white/5 text-stone-300 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <span className="text-xl">{page.icon}</span>
+                  <span>{page.label}</span>
+                </button>
+              ))}
+            </nav>
+
+            <a
+              href={inviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-5 flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 font-black text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-500"
+            >
+              Join Discord
+            </a>
+          </aside>
+
+          <section className="rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-2xl backdrop-blur md:p-7">
+            <div className="mb-6 flex flex-col justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 md:flex-row md:items-center">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-200">Bloodline Medical</p>
+                <h1 className="mt-2 text-4xl font-black tracking-tight text-white md:text-5xl">{activeTitle}</h1>
+              </div>
+              <div className="rounded-2xl border border-emerald-400/20 bg-emerald-950/30 px-5 py-3 text-sm font-bold text-emerald-200">
+                Status: Open for Calls
+              </div>
+            </div>
+
+            {activePage === "home" && <HomePage setActivePage={setActivePage} inviteUrl={inviteUrl} />}
+            {activePage === "channels" && <ChannelsPage />}
+            {activePage === "crops" && <CropsPage />}
+            {activePage === "medical-reports" && <MedicalReportsPage />}
+            {activePage === "psychology-reports" && <PsychologyReportsPage />}
+            {activePage === "prices" && <PricesPage />}
+            {activePage === "storage-logs" && <StorageLogsPage />}
+            {activePage === "death-records" && <DeathRecordsPage />}
+          </section>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function Header({ inviteUrl }) {
+  return (
+    <header className="border-b border-white/10 bg-black/45 px-4 py-4 backdrop-blur lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-600 text-3xl shadow-lg shadow-red-900/40">
+            ✚
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white">Blackwater Medical Department</h1>
+            <p className="text-sm text-stone-400">Emergency care, records, supplies, and field operations.</p>
+          </div>
+        </div>
+        <a
+          href={inviteUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-2xl bg-white px-6 py-3 text-center font-black text-stone-950 transition hover:bg-stone-200"
+        >
+          Open Discord
+        </a>
+      </div>
+    </header>
+  );
+}
+
+function HomePage({ setActivePage, inviteUrl }) {
+  const quickCards = [
+    { title: "Medical Reports", text: "Write treatment notes, injury details, medication given, and patient outcome.", page: "medical-reports", icon: "📝" },
+    { title: "Psychology Reports", text: "Track mental evaluations, session notes, risks, and follow-up recommendations.", page: "psychology-reports", icon: "🧠" },
+    { title: "Storage Logs", text: "Record what was added, removed, transferred, or restocked from medical storage.", page: "storage-logs", icon: "📦" },
+    { title: "Death Records", text: "Document deceased citizens, cause of death, location, witnesses, and official notes.", page: "death-records", icon: "⚰️" },
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-red-950 via-stone-950 to-emerald-950 p-8 md:p-10">
+        <div className="max-w-3xl">
+          <p className="mb-4 inline-flex rounded-full border border-red-300/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100">
+            Official Medical Website
+          </p>
+          <h2 className="text-5xl font-black leading-tight text-white md:text-7xl">
+            Organized care starts here.
+          </h2>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-300">
+            A complete medical department portal for Discord channels, crop tracking, reports, psychology notes, pricing, storage, and death records.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a
+              href={inviteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-2xl bg-red-600 px-7 py-4 text-center font-black text-white shadow-xl shadow-red-900/40 transition hover:bg-red-500"
+            >
+              Join Medical Discord
+            </a>
+            <button
+              onClick={() => setActivePage("medical-reports")}
+              className="rounded-2xl border border-white/15 bg-white/10 px-7 py-4 font-black text-white transition hover:bg-white/15"
+            >
+              Start a Report
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {quickCards.map((card) => (
+          <button
+            key={card.title}
+            onClick={() => setActivePage(card.page)}
+            className="rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-xl transition hover:-translate-y-1 hover:bg-white/10"
+          >
+            <div className="text-4xl">{card.icon}</div>
+            <h3 className="mt-5 text-2xl font-black text-white">{card.title}</h3>
+            <p className="mt-3 text-sm leading-6 text-stone-400">{card.text}</p>
+          </button>
+        ))}
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-3">
+        <InfoPanel title="Emergency Flow" items={["Receive call or telegram", "Respond with proper equipment", "Treat patient on scene", "Transport if needed", "File a medical report"]} />
+        <InfoPanel title="Department Rules" items={["EMS cannot be robbed while on duty", "Medical supplies must be logged", "Reports must be professional", "Death records require clear details", "Respect patient privacy"]} />
+        <InfoPanel title="Useful Contacts" items={["Telegram postal: MEDIC", "Blackwater Clinic", "Strawberry Clinic", "Psychology Office", "Medical Command"]} />
+      </section>
+    </div>
+  );
+}
+
+function ChannelsPage() {
+  const channels = [
+    { name: "📢｜medical-announcements", use: "Important department updates, policy changes, meeting times, and clinic notices." },
+    { name: "📋｜medical-sop", use: "Official EMS rules, treatment standards, on-duty expectations, and conduct policies." },
+    { name: "🚑｜medical-chat", use: "General EMS communication, coordination, shift notes, and non-emergency discussion." },
+    { name: "📝｜medical-reports", use: "Completed patient reports, treatment summaries, and incident documentation." },
+    { name: "🧠｜psychology-reports", use: "Mental health session logs, evaluations, wellness notes, and follow-up records." },
+    { name: "💵｜prices", use: "Treatment prices, transport charges, medication costs, and clinic service fees." },
+    { name: "📦｜storage-logs", use: "Medical storage activity, supply removals, restocks, crop deposits, and equipment usage." },
+    { name: "⚰️｜death-records", use: "Official death records, body discoveries, scene notes, and cause of death logs." },
+    { name: "🌿｜crops", use: "Medical crop tracking, herb farming, medicine ingredients, and supply requests." },
+    { name: "🎫｜medical-support", use: "Questions, complaints, applications, and requests for command assistance." },
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Discord Layout"
+        title="Medical Channels"
+        text="Use these channels to keep medical roleplay clean, easy to follow, and properly documented."
+      />
+      <div className="grid gap-4 md:grid-cols-2">
+        {channels.map((channel) => (
+          <div key={channel.name} className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-xl font-black text-white">{channel.name}</h3>
+            <p className="mt-3 leading-7 text-stone-400">{channel.use}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CropsPage() {
+  const crops = [
+    { crop: "Yarrow", use: "Basic wound care", status: "Stable", stock: "42 bundles" },
+    { crop: "Ginseng", use: "Recovery mixtures", status: "Low", stock: "13 roots" },
+    { crop: "Mint", use: "Stomach relief", status: "High", stock: "65 leaves" },
+    { crop: "Sage", use: "Calming mixtures", status: "Stable", stock: "31 bundles" },
+    { crop: "Valerian", use: "Sleep and stress support", status: "Critical", stock: "6 flowers" },
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Herbal Supply"
+        title="Medical Crops"
+        text="Track medicinal crops, herb stock, crop purpose, supply level, and restock needs."
+      />
+      <TableCard
+        columns={["Crop", "Medical Use", "Stock", "Status"]}
+        rows={crops.map((item) => [item.crop, item.use, item.stock, <StatusBadge key={item.crop} status={item.status} />])}
+      />
+      <FormCard
+        title="Crop Log Template"
+        fields={[
+          "Date / Time",
+          "Medic Name",
+          "Crop Added or Removed",
+          "Amount",
+          "Reason",
+          "Storage Location",
+          "Command Approval if Required",
+        ]}
+      />
+    </div>
+  );
+}
+
+function MedicalReportsPage() {
+  const reports = [
+    ["MR-001", "John Doe", "Gunshot wound", "Blackwater", "Treated / transported", "Dr. Krown"],
+    ["MR-002", "Jane Smith", "Fall injury", "Strawberry", "Bandaged / released", "Nurse Maeve"],
+    ["MR-003", "Unknown Male", "Unconscious", "Saint Denis", "Stabilized", "Medic Wolfe"],
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Patient Care"
+        title="Medical Reports"
+        text="Use this page to organize treatment records, injury details, medication given, and patient outcomes."
+      />
+      <TableCard
+        columns={["Report ID", "Patient", "Injury", "Location", "Outcome", "Medic"]}
+        rows={reports}
+      />
+      <FormCard
+        title="Medical Report Template"
+        fields={[
+          "Report ID",
+          "Date / Time",
+          "Medic Name",
+          "Patient Name",
+          "Scene Location",
+          "Injuries Found",
+          "Treatment Given",
+          "Medication Used",
+          "Transported? Yes / No",
+          "Final Outcome",
+          "Additional Notes",
+        ]}
+      />
+    </div>
+  );
+}
+
+function PsychologyReportsPage() {
+  const sessions = [
+    ["PSY-001", "Private", "Stress evaluation", "Follow-up needed", "Low"],
+    ["PSY-002", "Private", "Trauma debrief", "Stable", "Medium"],
+    ["PSY-003", "Private", "Fitness review", "Cleared", "Low"],
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Mental Health"
+        title="Psychology Reports"
+        text="Private psychology records for evaluations, wellness checks, trauma sessions, and follow-up planning."
+      />
+      <TableCard
+        columns={["Case ID", "Patient", "Session Type", "Recommendation", "Risk Level"]}
+        rows={sessions}
+      />
+      <FormCard
+        title="Psychology Report Template"
+        fields={[
+          "Case ID",
+          "Date / Time",
+          "Psychologist / Medic Name",
+          "Patient Name",
+          "Reason for Session",
+          "Mental State Observed",
+          "Risk Level",
+          "Summary of Discussion",
+          "Recommendations",
+          "Follow-Up Required?",
+          "Confidential Notes",
+        ]}
+      />
+    </div>
+  );
+}
+
+function PricesPage() {
+  const prices = [
+    ["Basic Checkup", "$25", "Quick health check and minor advice"],
+    ["Bandage / Minor Treatment", "$50", "Small cuts, bruises, and simple care"],
+    ["Medication", "$75", "Medicine or herbal treatment"],
+    ["Emergency Treatment", "$150", "Serious injury treatment on scene"],
+    ["Transport to Clinic", "$100", "Wagon or ferry transport when needed"],
+    ["Surgery / Critical Care", "$300", "Major injury, severe bleeding, or operation"],
+    ["Psychology Session", "$125", "Mental health appointment or evaluation"],
+    ["Death Examination", "$200", "Official examination and death record"],
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Clinic Billing"
+        title="Medical Prices"
+        text="Prices are designed to encourage careful roleplay, realistic consequences, and proper medical value."
+      />
+      <TableCard columns={["Service", "Price", "Notes"]} rows={prices} />
+      <div className="rounded-3xl border border-yellow-400/20 bg-yellow-950/20 p-6">
+        <h3 className="text-2xl font-black text-yellow-100">Billing Notice</h3>
+        <p className="mt-3 leading-7 text-yellow-50/80">
+          Prices are not high to make a profit. They are meant to encourage people to be more cautious, avoid reckless injury, and value medical roleplay.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function StorageLogsPage() {
+  const logs = [
+    ["SL-001", "Bandages", "+25", "Restock", "Dr. Krown"],
+    ["SL-002", "Medicine", "-8", "Emergency scene", "Nurse Maeve"],
+    ["SL-003", "Yarrow", "+15", "Crop deposit", "Medic Wolfe"],
+    ["SL-004", "Surgical Kit", "-1", "Critical operation", "Dr. Krown"],
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Supply Control"
+        title="Storage Logs"
+        text="Every item added, removed, transferred, or used from medical storage should be logged clearly."
+      />
+      <TableCard columns={["Log ID", "Item", "Amount", "Reason", "Medic"]} rows={logs} />
+      <FormCard
+        title="Storage Log Template"
+        fields={[
+          "Log ID",
+          "Date / Time",
+          "Medic Name",
+          "Item Name",
+          "Amount Added or Removed",
+          "Reason",
+          "Storage Location",
+          "Scene / Report Connected",
+          "Approved By",
+        ]}
+      />
+    </div>
+  );
+}
+
+function DeathRecordsPage() {
+  const records = [
+    ["DR-001", "Unknown Male", "Gunshot wounds", "Blackwater Alley", "Pending investigation"],
+    ["DR-002", "Jane Doe", "Animal attack", "Great Plains", "Closed"],
+    ["DR-003", "Unknown Female", "Drowning", "Flat Iron Lake", "Filed with law"],
+  ];
+
+  return (
+    <div className="grid gap-6">
+      <PageIntro
+        eyebrow="Official Records"
+        title="Death Records"
+        text="Document every death scene with clear details, cause of death, location, witnesses, and final status."
+      />
+      <TableCard columns={["Record ID", "Name", "Cause", "Location", "Status"]} rows={records} />
+      <FormCard
+        title="Death Record Template"
+        fields={[
+          "Record ID",
+          "Date / Time Found",
+          "Deceased Name",
+          "Found By",
+          "Location Found",
+          "Known Injuries",
+          "Likely Cause of Death",
+          "Witnesses",
+          "Law Enforcement Notified?",
+          "Body Transported To",
+          "Final Notes",
+        ]}
+      />
+    </div>
+  );
+}
+
+function PageIntro({ eyebrow, title, text }) {
+  return (
+    <section className="rounded-[2rem] border border-white/10 bg-white/5 p-7">
+      <p className="text-sm font-black uppercase tracking-[0.3em] text-red-200">{eyebrow}</p>
+      <h2 className="mt-2 text-4xl font-black text-white md:text-5xl">{title}</h2>
+      <p className="mt-4 max-w-3xl leading-8 text-stone-300">{text}</p>
+    </section>
+  );
+}
+
+function TableCard({ columns, rows }) {
+  return (
+    <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[720px] border-collapse text-left">
+          <thead className="bg-white/10 text-sm uppercase tracking-wider text-stone-300">
+            <tr>
+              {columns.map((column) => (
+                <th key={column} className="px-5 py-4 font-black">{column}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={rowIndex} className="border-t border-white/10 text-stone-300">
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className="px-5 py-4 align-middle">{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function FormCard({ title, fields }) {
+  return (
+    <div className="rounded-[2rem] border border-white/10 bg-black/25 p-6">
+      <h3 className="text-2xl font-black text-white">{title}</h3>
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        {fields.map((field) => (
+          <label key={field} className="grid gap-2">
+            <span className="text-sm font-bold text-stone-300">{field}</span>
+            <input
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-stone-600 focus:border-red-400"
+              placeholder={`Enter ${field.toLowerCase()}`}
+            />
+          </label>
+        ))}
+      </div>
+      <button className="mt-6 rounded-2xl bg-red-600 px-6 py-3 font-black text-white transition hover:bg-red-500">
+        Save Template Entry
+      </button>
+    </div>
+  );
+}
+
+function InfoPanel({ title, items }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+      <h3 className="text-2xl font-black text-white">{title}</h3>
+      <ul className="mt-4 grid gap-3">
+        {items.map((item) => (
+          <li key={item} className="rounded-2xl bg-black/25 px-4 py-3 text-sm text-stone-300">
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const styles = {
+    High: "border-emerald-400/30 bg-emerald-500/15 text-emerald-200",
+    Stable: "border-blue-400/30 bg-blue-500/15 text-blue-200",
+    Low: "border-yellow-400/30 bg-yellow-500/15 text-yellow-200",
+    Critical: "border-red-400/30 bg-red-500/15 text-red-200",
+  };
+
+  return (
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${styles[status] || styles.Stable}`}>
+      {status}
+    </span>
+  );
+}
