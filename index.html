@@ -36,7 +36,7 @@
 
       const channels = [
         ["📢｜medical-announcements", "Important department updates, policy changes, clinic notices, and meeting times."],
-        ["📋｜medical-sop", "Official EMS rules, conduct standards, on-duty expectations, and treatment procedures."],
+        ["📋｜medical-sop", "Official rules, conduct standards, on-duty expectations, and treatment procedures."],
         ["🚑｜medical-chat", "General medical communication, shift notes, call coordination, and department discussion."],
         ["🌿｜crops", "Medicinal crop tracking, herbs, crop deposits, farming logs, and supply needs."],
         ["📝｜medical-reports", "Patient treatment reports, injury details, medication used, and transport notes."],
@@ -52,7 +52,7 @@
           title: "Crops",
           eyebrow: "Herbal Supply",
           description: "Track medicinal crops, herb stock, crop purpose, supply level, and restock needs.",
-          storageKey: "bloodline-medical-crops",
+          storageKey: "storycreek-medical-crops",
           idPrefix: "CR",
           starter: [
             { id: "CR-001", crop: "Yarrow", use: "Basic wound care", amount: "42 bundles", status: "Stable", medic: "System", created: "Starter" },
@@ -74,7 +74,7 @@
           title: "Medical Reports",
           eyebrow: "Patient Care",
           description: "Create treatment records, injury details, medication given, transport notes, and patient outcomes.",
-          storageKey: "bloodline-medical-reports",
+          storageKey: "storycreek-medical-reports",
           idPrefix: "MR",
           starter: [],
           fields: [
@@ -93,7 +93,7 @@
           title: "Psychology Reports",
           eyebrow: "Mental Health",
           description: "Private psychology records for evaluations, wellness checks, trauma sessions, and follow-up planning.",
-          storageKey: "bloodline-psychology-reports",
+          storageKey: "storycreek-psychology-reports",
           idPrefix: "PSY",
           starter: [],
           fields: [
@@ -111,7 +111,7 @@
           title: "Prices",
           eyebrow: "Clinic Billing",
           description: "Treatment prices, transport charges, medication costs, and service fees.",
-          storageKey: "bloodline-medical-prices",
+          storageKey: "storycreek-medical-prices",
           idPrefix: "PR",
           starter: [
             { id: "PR-001", service: "Basic Checkup", price: "$25", notes: "Quick health check and minor advice", created: "Starter" },
@@ -135,7 +135,7 @@
           title: "Storage Logs",
           eyebrow: "Supply Control",
           description: "Every item added, removed, transferred, or used from medical storage should be logged clearly.",
-          storageKey: "bloodline-storage-logs",
+          storageKey: "storycreek-storage-logs",
           idPrefix: "SL",
           starter: [],
           fields: [
@@ -153,7 +153,7 @@
           title: "Death Records",
           eyebrow: "Official Records",
           description: "Document every death scene with clear details, cause of death, location, witnesses, and final status.",
-          storageKey: "bloodline-death-records",
+          storageKey: "storycreek-death-records",
           idPrefix: "DR",
           starter: [],
           fields: [
@@ -252,7 +252,7 @@
         const activeTitle = useMemo(() => navPages.find((page) => page.id === activePage)?.label || "Home", [activePage]);
 
         function exportAll() {
-          downloadFile("bloodline-medical-records.json", {
+          downloadFile("storycreek-medical-records.json", {
             invite: INVITE_URL,
             crops,
             medicalReports: medical,
@@ -297,7 +297,7 @@
                 <section className="rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-2xl backdrop-blur md:p-7 print:border-0 print:bg-white print:text-black print:shadow-none">
                   <div className="mb-6 flex flex-col justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 xl:flex-row xl:items-center print:border-black/10 print:bg-white">
                     <div>
-                      <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-200 print:text-red-800">Bloodline Medical</p>
+                      <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-200 print:text-red-800">Storycreek Medical</p>
                       <h1 className="mt-2 text-4xl font-black tracking-tight text-white md:text-5xl print:text-black">{activeTitle}</h1>
                       <p className="mt-2 break-all text-sm text-stone-400 print:text-black">Secure invite: {INVITE_URL}</p>
                     </div>
