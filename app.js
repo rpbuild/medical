@@ -1,0 +1,545 @@
+const { useEffect, useMemo, useState } = React;
+      const INVITE_URL = "https://discord.gg/Y3DUXufKn";
+
+      const navPages = [
+        { id: "home", label: "Home", icon: "🏥" },
+        { id: "channels", label: "Channels", icon: "📚" },
+        { id: "crops", label: "Crops", icon: "🌿" },
+        { id: "medical", label: "Medical Reports", icon: "📝" },
+        { id: "psychology", label: "Psychology Reports", icon: "🧠" },
+        { id: "prices", label: "Prices", icon: "💵" },
+        { id: "storage", label: "Storage Logs", icon: "📦" },
+        { id: "deaths", label: "Death Records", icon: "⚰️" },
+      ];
+
+      const channels = [
+        ["📢｜medical-announcements", "Important department updates, policy changes, clinic notices, and meeting times."],
+        ["📋｜medical-sop", "Official EMS rules, conduct standards, on-duty expectations, and treatment procedures."],
+        ["🚑｜medical-chat", "General medical communication, shift notes, call coordination, and department discussion."],
+        ["🌿｜crops", "Medicinal crop tracking, herbs, crop deposits, farming logs, and supply needs."],
+        ["📝｜medical-reports", "Patient treatment reports, injury details, medication used, and transport notes."],
+        ["🧠｜psychology-reports", "Mental health evaluations, wellness checks, trauma debriefs, and follow-up notes."],
+        ["💵｜prices", "Treatment prices, transport fees, medicine costs, and clinic service prices."],
+        ["📦｜storage-logs", "Supply restocks, removed items, transferred items, and medical equipment logs."],
+        ["⚰️｜death-records", "Official death records, cause of death notes, locations, witnesses, and final status."],
+        ["🎫｜medical-support", "Applications, questions, complaints, and command support requests."],
+      ];
+
+      const configs = {
+        crops: {
+          title: "Crops",
+          eyebrow: "Herbal Supply",
+          description: "Track medicinal crops, herb stock, crop purpose, supply level, and restock needs.",
+          storageKey: "bloodline-medical-crops",
+          idPrefix: "CR",
+          starter: [
+            { id: "CR-001", crop: "Yarrow", use: "Basic wound care", amount: "42 bundles", status: "Stable", medic: "System", created: "Starter" },
+            { id: "CR-002", crop: "Ginseng", use: "Recovery mixtures", amount: "13 roots", status: "Low", medic: "System", created: "Starter" },
+            { id: "CR-003", crop: "Mint", use: "Stomach relief", amount: "65 leaves", status: "High", medic: "System", created: "Starter" },
+            { id: "CR-004", crop: "Valerian", use: "Sleep and stress support", amount: "6 flowers", status: "Critical", medic: "System", created: "Starter" },
+          ],
+          fields: [
+            { key: "crop", label: "Crop Name", required: true, placeholder: "Yarrow" },
+            { key: "use", label: "Medical Use", placeholder: "Basic wound care" },
+            { key: "amount", label: "Amount", required: true, placeholder: "20 bundles" },
+            { key: "status", label: "Status", type: "select", options: ["High", "Stable", "Low", "Critical"] },
+            { key: "medic", label: "Medic Name", placeholder: "Dr. Krown" },
+          ],
+          columns: ["ID", "Crop", "Medical Use", "Amount", "Status", "Medic", "Created"],
+          row: (x) => [x.id, x.crop, x.use, x.amount, <Badge key={x.id} value={x.status} />, x.medic, x.created],
+        },
+        medical: {
+          title: "Medical Reports",
+          eyebrow: "Patient Care",
+          description: "Create treatment records, injury details, medication given, transport notes, and patient outcomes.",
+          storageKey: "bloodline-medical-reports",
+          idPrefix: "MR",
+          starter: [],
+          fields: [
+            { key: "patient", label: "Patient Name", required: true, placeholder: "John Doe" },
+            { key: "medic", label: "Medic Name", required: true, placeholder: "Dr. Krown" },
+            { key: "location", label: "Scene Location", placeholder: "Blackwater" },
+            { key: "injury", label: "Injuries Found", required: true, placeholder: "Gunshot wound, broken arm, etc." },
+            { key: "treatment", label: "Treatment Given", type: "textarea", placeholder: "Bandaged wound, gave medication, transported to clinic..." },
+            { key: "outcome", label: "Final Outcome", type: "select", options: ["Treated / Released", "Transported", "Critical", "Deceased", "Refused Treatment"] },
+            { key: "notes", label: "Additional Notes", type: "textarea", placeholder: "Extra details..." },
+          ],
+          columns: ["ID", "Patient", "Medic", "Location", "Injury", "Outcome", "Created"],
+          row: (x) => [x.id, x.patient, x.medic, x.location, x.injury, x.outcome, x.created],
+        },
+        psychology: {
+          title: "Psychology Reports",
+          eyebrow: "Mental Health",
+          description: "Private psychology records for evaluations, wellness checks, trauma sessions, and follow-up planning.",
+          storageKey: "bloodline-psychology-reports",
+          idPrefix: "PSY",
+          starter: [],
+          fields: [
+            { key: "patient", label: "Patient Name", required: true, placeholder: "Private or patient name" },
+            { key: "doctor", label: "Psychologist / Medic", required: true, placeholder: "Dr. Krown" },
+            { key: "session", label: "Session Type", placeholder: "Trauma debrief, stress evaluation, fitness review" },
+            { key: "risk", label: "Risk Level", type: "select", options: ["Low", "Medium", "High", "Critical"] },
+            { key: "summary", label: "Session Summary", type: "textarea", placeholder: "Brief summary of the session..." },
+            { key: "recommendation", label: "Recommendation", type: "textarea", placeholder: "Cleared, follow-up needed, command review, etc." },
+          ],
+          columns: ["ID", "Patient", "Doctor", "Session", "Risk", "Recommendation", "Created"],
+          row: (x) => [x.id, x.patient, x.doctor, x.session, <Badge key={x.id} value={x.risk} />, x.recommendation, x.created],
+        },
+        prices: {
+          title: "Prices",
+          eyebrow: "Clinic Billing",
+          description: "Treatment prices, transport charges, medication costs, and service fees.",
+          storageKey: "bloodline-medical-prices",
+          idPrefix: "PR",
+          starter: [
+            { id: "PR-001", service: "Basic Checkup", price: "$25", notes: "Quick health check and minor advice", created: "Starter" },
+            { id: "PR-002", service: "Bandage / Minor Treatment", price: "$50", notes: "Small cuts, bruises, and simple care", created: "Starter" },
+            { id: "PR-003", service: "Medication", price: "$75", notes: "Medicine or herbal treatment", created: "Starter" },
+            { id: "PR-004", service: "Emergency Treatment", price: "$150", notes: "Serious injury treatment on scene", created: "Starter" },
+            { id: "PR-005", service: "Transport to Clinic", price: "$100", notes: "Wagon or ferry transport when needed", created: "Starter" },
+            { id: "PR-006", service: "Surgery / Critical Care", price: "$300", notes: "Major injury, severe bleeding, or operation", created: "Starter" },
+            { id: "PR-007", service: "Psychology Session", price: "$125", notes: "Mental health appointment or evaluation", created: "Starter" },
+            { id: "PR-008", service: "Death Examination", price: "$200", notes: "Official examination and death record", created: "Starter" },
+          ],
+          fields: [
+            { key: "service", label: "Service", required: true, placeholder: "Emergency Treatment" },
+            { key: "price", label: "Price", required: true, placeholder: "$150" },
+            { key: "notes", label: "Notes", placeholder: "What this service includes" },
+          ],
+          columns: ["ID", "Service", "Price", "Notes", "Created"],
+          row: (x) => [x.id, x.service, x.price, x.notes, x.created],
+        },
+        storage: {
+          title: "Storage Logs",
+          eyebrow: "Supply Control",
+          description: "Every item added, removed, transferred, or used from medical storage should be logged clearly.",
+          storageKey: "bloodline-storage-logs",
+          idPrefix: "SL",
+          starter: [],
+          fields: [
+            { key: "item", label: "Item Name", required: true, placeholder: "Bandages" },
+            { key: "amount", label: "Amount", required: true, placeholder: "+25 or -5" },
+            { key: "action", label: "Action", type: "select", options: ["Added", "Removed", "Transferred", "Used", "Restocked"] },
+            { key: "reason", label: "Reason", placeholder: "Emergency scene, crop deposit, restock..." },
+            { key: "medic", label: "Medic Name", required: true, placeholder: "Nurse Maeve" },
+            { key: "approved", label: "Approved By", placeholder: "Command name if needed" },
+          ],
+          columns: ["ID", "Item", "Amount", "Action", "Reason", "Medic", "Approved", "Created"],
+          row: (x) => [x.id, x.item, x.amount, x.action, x.reason, x.medic, x.approved, x.created],
+        },
+        deaths: {
+          title: "Death Records",
+          eyebrow: "Official Records",
+          description: "Document every death scene with clear details, cause of death, location, witnesses, and final status.",
+          storageKey: "bloodline-death-records",
+          idPrefix: "DR",
+          starter: [],
+          fields: [
+            { key: "deceased", label: "Deceased Name", required: true, placeholder: "Unknown Male" },
+            { key: "foundBy", label: "Found By", placeholder: "Medic / Officer name" },
+            { key: "location", label: "Location Found", required: true, placeholder: "Blackwater Alley" },
+            { key: "cause", label: "Likely Cause of Death", required: true, placeholder: "Gunshot wounds" },
+            { key: "law", label: "Law Notified?", type: "select", options: ["Yes", "No", "Pending"] },
+            { key: "status", label: "Record Status", type: "select", options: ["Open", "Pending Investigation", "Filed with Law", "Closed"] },
+            { key: "notes", label: "Final Notes", type: "textarea", placeholder: "Witnesses, body transport, scene details..." },
+          ],
+          columns: ["ID", "Deceased", "Location", "Cause", "Law", "Status", "Created"],
+          row: (x) => [x.id, x.deceased, x.location, x.cause, x.law, x.status, x.created],
+        },
+      };
+
+      function useLocalRecords(config) {
+        const [records, setRecords] = useState(() => {
+          try {
+            const saved = localStorage.getItem(config.storageKey);
+            return saved ? JSON.parse(saved) : config.starter;
+          } catch {
+            return config.starter;
+          }
+        });
+
+        useEffect(() => {
+          try {
+            localStorage.setItem(config.storageKey, JSON.stringify(records));
+          } catch {
+            // The page still works for the current session if browser storage is blocked.
+          }
+        }, [config.storageKey, records]);
+
+        return [records, setRecords];
+      }
+
+      function makeBlank(fields) {
+        const blank = {};
+        fields.forEach((field) => {
+          blank[field.key] = field.type === "select" ? field.options[0] : "";
+        });
+        return blank;
+      }
+
+      function now() {
+        return new Date().toLocaleString([], {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function nextId(prefix, records) {
+        const nextNumber = records.length + 1;
+        return `${prefix}-${String(nextNumber).padStart(3, "0")}`;
+      }
+
+      function matchesSearch(item, search) {
+        if (!search.trim()) return true;
+        return JSON.stringify(item).toLowerCase().includes(search.toLowerCase());
+      }
+
+      function downloadFile(name, data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function MedicalDepartmentWebsite() {
+        const [activePage, setActivePage] = useState("home");
+        const [search, setSearch] = useState("");
+
+        const [crops, setCrops] = useLocalRecords(configs.crops);
+        const [medical, setMedical] = useLocalRecords(configs.medical);
+        const [psychology, setPsychology] = useLocalRecords(configs.psychology);
+        const [prices, setPrices] = useLocalRecords(configs.prices);
+        const [storage, setStorage] = useLocalRecords(configs.storage);
+        const [deaths, setDeaths] = useLocalRecords(configs.deaths);
+
+        const dataMap = {
+          crops: [crops, setCrops],
+          medical: [medical, setMedical],
+          psychology: [psychology, setPsychology],
+          prices: [prices, setPrices],
+          storage: [storage, setStorage],
+          deaths: [deaths, setDeaths],
+        };
+
+        const activeTitle = useMemo(() => navPages.find((page) => page.id === activePage)?.label || "Home", [activePage]);
+
+        function exportAll() {
+          downloadFile("bloodline-medical-records.json", {
+            invite: INVITE_URL,
+            crops,
+            medicalReports: medical,
+            psychologyReports: psychology,
+            prices,
+            storage,
+            deathRecords: deaths,
+          });
+        }
+
+        return (
+          <main className="min-h-screen bg-stone-950 text-stone-100">
+            <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(185,28,28,0.32),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(22,163,74,0.18),_transparent_35%)]">
+              <Header />
+
+              <section className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[300px_1fr] lg:px-8">
+                <aside className="rounded-[2rem] border border-white/10 bg-black/35 p-4 shadow-2xl backdrop-blur print:hidden">
+                  <div className="mb-4 rounded-3xl border border-red-400/20 bg-red-950/30 p-5">
+                    <p className="text-xs uppercase tracking-[0.3em] text-red-200">Department Portal</p>
+                    <h2 className="mt-2 text-2xl font-black text-white">Medical HQ</h2>
+                    <p className="mt-2 text-sm leading-6 text-stone-300">Working records, logs, reports, prices, and Discord information.</p>
+                  </div>
+
+                  <nav className="grid gap-2">
+                    {navPages.map((page) => (
+                      <button
+                        key={page.id}
+                        onClick={() => setActivePage(page.id)}
+                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition ${activePage === page.id ? "bg-red-600 text-white shadow-lg shadow-red-900/30" : "bg-white/5 text-stone-300 hover:bg-white/10 hover:text-white"}`}
+                      >
+                        <span className="text-xl">{page.icon}</span>
+                        <span>{page.label}</span>
+                      </button>
+                    ))}
+                  </nav>
+
+                  <a href={INVITE_URL} target="_blank" rel="noreferrer" className="mt-5 flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 font-black text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-500">
+                    Join Discord
+                  </a>
+                </aside>
+
+                <section className="rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-2xl backdrop-blur md:p-7 print:border-0 print:bg-white print:text-black print:shadow-none">
+                  <div className="mb-6 flex flex-col justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 xl:flex-row xl:items-center print:border-black/10 print:bg-white">
+                    <div>
+                      <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-200 print:text-red-800">Bloodline Medical</p>
+                      <h1 className="mt-2 text-4xl font-black tracking-tight text-white md:text-5xl print:text-black">{activeTitle}</h1>
+                      <p className="mt-2 break-all text-sm text-stone-400 print:text-black">Secure invite: {INVITE_URL}</p>
+                    </div>
+                    <div className="flex flex-col gap-3 sm:flex-row print:hidden">
+                      <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search current page..." className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none placeholder:text-stone-500 focus:border-red-400" />
+                      <button onClick={exportAll} className="rounded-2xl border border-emerald-400/20 bg-emerald-950/50 px-5 py-3 text-sm font-black text-emerald-100 transition hover:bg-emerald-900/70">Export Records</button>
+                    </div>
+                  </div>
+
+                  {activePage === "home" && (
+                    <HomePage
+                      setActivePage={setActivePage}
+                      totals={{ crops: crops.length, medical: medical.length, psychology: psychology.length, prices: prices.length, storage: storage.length, deaths: deaths.length }}
+                    />
+                  )}
+
+                  {activePage === "channels" && <ChannelsPage search={search} />}
+
+                  {Object.keys(configs).map((key) => {
+                    if (activePage !== key) return null;
+                    const [records, setRecords] = dataMap[key];
+                    return <RecordsPage key={key} config={configs[key]} records={records} setRecords={setRecords} search={search} />;
+                  })}
+                </section>
+              </section>
+            </div>
+          </main>
+        );
+      }
+
+      function Header() {
+        return (
+          <header className="border-b border-white/10 bg-black/45 px-4 py-4 backdrop-blur print:hidden lg:px-8">
+            <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 md:flex-row md:items-center">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-600 text-3xl shadow-lg shadow-red-900/40">✚</div>
+                <div>
+                  <h1 className="text-2xl font-black text-white">Blackwater Medical Department</h1>
+                  <p className="text-sm text-stone-400">Emergency care, records, supplies, and field operations.</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button onClick={() => window.print()} className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-center font-black text-white transition hover:bg-white/10">Print Page</button>
+                <a href={INVITE_URL} target="_blank" rel="noreferrer" className="rounded-2xl bg-white px-6 py-3 text-center font-black text-stone-950 transition hover:bg-stone-200">Open HTTPS Discord</a>
+              </div>
+            </div>
+          </header>
+        );
+      }
+
+      function HomePage({ setActivePage, totals }) {
+        const cards = [
+          ["crops", "🌿", "Crops", totals.crops, "Track herbs, crop supply, and medical use."],
+          ["medical", "📝", "Medical Reports", totals.medical, "Create patient treatment reports and outcomes."],
+          ["psychology", "🧠", "Psychology Reports", totals.psychology, "Track evaluations, risk levels, and follow-ups."],
+          ["prices", "💵", "Prices", totals.prices, "Manage treatment and service prices."],
+          ["storage", "📦", "Storage Logs", totals.storage, "Log supplies added, removed, or used."],
+          ["deaths", "⚰️", "Death Records", totals.deaths, "Document death scenes and official records."],
+        ];
+
+        return (
+          <div className="grid gap-6">
+            <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-red-950 via-stone-950 to-emerald-950 p-8 md:p-10 print:border-black/10 print:bg-white">
+              <p className="mb-4 inline-flex rounded-full border border-red-300/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-100 print:text-red-800">Official Medical Website</p>
+              <h2 className="max-w-3xl text-5xl font-black leading-tight text-white md:text-7xl print:text-black">Organized care starts here.</h2>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-300 print:text-black">A working medical department portal with individual pages, saved records, searchable logs, printable pages, and HTTPS Discord access.</p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row print:hidden">
+                <a href={INVITE_URL} target="_blank" rel="noreferrer" className="rounded-2xl bg-red-600 px-7 py-4 text-center font-black text-white shadow-xl shadow-red-900/40 transition hover:bg-red-500">Join Medical Discord</a>
+                <button onClick={() => setActivePage("medical")} className="rounded-2xl border border-white/15 bg-white/10 px-7 py-4 font-black text-white transition hover:bg-white/15">Start a Report</button>
+              </div>
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {cards.map(([page, icon, title, total, text]) => (
+                <button key={page} onClick={() => setActivePage(page)} className="rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-xl transition hover:-translate-y-1 hover:bg-white/10 print:border-black/10 print:bg-white">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-4xl">{icon}</div>
+                    <div className="rounded-2xl bg-black/30 px-4 py-2 text-sm font-black text-red-100 print:bg-black/5 print:text-black">{total} saved</div>
+                  </div>
+                  <h3 className="mt-5 text-2xl font-black text-white print:text-black">{title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-stone-400 print:text-black">{text}</p>
+                </button>
+              ))}
+            </section>
+
+            <section className="grid gap-6 lg:grid-cols-3">
+              <InfoPanel title="Emergency Flow" items={["Receive call or telegram", "Respond with proper equipment", "Treat patient on scene", "Transport if needed", "File a medical report"]} />
+              <InfoPanel title="Department Rules" items={["EMS cannot be robbed while on duty", "Medical supplies must be logged", "Reports must be professional", "Death records require clear details", "Respect patient privacy"]} />
+              <InfoPanel title="Useful Contacts" items={["Telegram postal: MEDIC", "Blackwater Clinic", "Strawberry Clinic", "Psychology Office", "Medical Command"]} />
+            </section>
+          </div>
+        );
+      }
+
+      function ChannelsPage({ search }) {
+        const filtered = channels.filter(([name, use]) => `${name} ${use}`.toLowerCase().includes(search.toLowerCase()));
+
+        return (
+          <div className="grid gap-6">
+            <Intro eyebrow="Discord Layout" title="Medical Channels" text="Use these channels to keep medical roleplay clean, easy to follow, and properly documented." />
+            <div className="grid gap-4 md:grid-cols-2">
+              {filtered.map(([name, use]) => (
+                <div key={name} className="rounded-3xl border border-white/10 bg-white/5 p-6 print:border-black/10 print:bg-white">
+                  <h3 className="text-xl font-black text-white print:text-black">{name}</h3>
+                  <p className="mt-3 leading-7 text-stone-400 print:text-black">{use}</p>
+                </div>
+              ))}
+            </div>
+            {filtered.length === 0 && <Empty />}
+          </div>
+        );
+      }
+
+      function RecordsPage({ config, records, setRecords, search }) {
+        const filtered = records.filter((record) => matchesSearch(record, search));
+
+        function addRecord(entry) {
+          const record = { id: nextId(config.idPrefix, records), ...entry, created: now() };
+          setRecords([record, ...records]);
+        }
+
+        function deleteRecord(id) {
+          setRecords(records.filter((record) => record.id !== id));
+        }
+
+        function clearRecords() {
+          const ok = window.confirm(`Clear all ${config.title}?`);
+          if (ok) setRecords([]);
+        }
+
+        return (
+          <div className="grid gap-6">
+            <Intro eyebrow={config.eyebrow} title={config.title} text={config.description} />
+            {config.title === "Prices" && (
+              <div className="rounded-3xl border border-yellow-400/20 bg-yellow-950/20 p-6 print:border-black/10 print:bg-white">
+                <h3 className="text-2xl font-black text-yellow-100 print:text-black">Billing Notice</h3>
+                <p className="mt-3 leading-7 text-yellow-50/80 print:text-black">Prices are not high to make a profit. They are meant to encourage people to be more cautious, avoid reckless injury, and value medical roleplay.</p>
+              </div>
+            )}
+            <RecordForm title={`Add ${config.title} Entry`} fields={config.fields} onSave={addRecord} />
+            <div className="flex flex-col justify-between gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center print:hidden">
+              <p className="font-bold text-stone-300">Showing {filtered.length} of {records.length} saved records.</p>
+              <button onClick={clearRecords} className="rounded-2xl border border-red-400/30 bg-red-950/40 px-5 py-3 font-black text-red-100 transition hover:bg-red-900/60">Clear This Page</button>
+            </div>
+            <RecordTable config={config} records={filtered} onDelete={deleteRecord} />
+            {filtered.length === 0 && <Empty />}
+          </div>
+        );
+      }
+
+      function RecordForm({ title, fields, onSave }) {
+        const [form, setForm] = useState(() => makeBlank(fields));
+        const [message, setMessage] = useState("");
+
+        function submit(e) {
+          e.preventDefault();
+          const missing = fields.find((field) => field.required && !String(form[field.key] || "").trim());
+          if (missing) {
+            setMessage(`${missing.label} is required.`);
+            return;
+          }
+          onSave(form);
+          setForm(makeBlank(fields));
+          setMessage("Saved successfully.");
+          setTimeout(() => setMessage(""), 1600);
+        }
+
+        return (
+          <form onSubmit={submit} className="rounded-[2rem] border border-white/10 bg-black/25 p-6 print:hidden">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <h3 className="text-2xl font-black text-white">{title}</h3>
+              {message && <p className="rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-red-100">{message}</p>}
+            </div>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {fields.map((field) => (
+                <label key={field.key} className={`grid gap-2 ${field.type === "textarea" ? "md:col-span-2" : ""}`}>
+                  <span className="text-sm font-bold text-stone-300">{field.label}{field.required && <span className="text-red-300"> *</span>}</span>
+                  {field.type === "textarea" ? (
+                    <textarea rows={4} value={form[field.key]} onChange={(e) => setForm({ ...form, [field.key]: e.target.value })} placeholder={field.placeholder} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-stone-600 focus:border-red-400" />
+                  ) : field.type === "select" ? (
+                    <select value={form[field.key]} onChange={(e) => setForm({ ...form, [field.key]: e.target.value })} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition focus:border-red-400">
+                      {field.options.map((option) => <option key={option} value={option} className="bg-stone-950 text-white">{option}</option>)}
+                    </select>
+                  ) : (
+                    <input value={form[field.key]} onChange={(e) => setForm({ ...form, [field.key]: e.target.value })} placeholder={field.placeholder} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-stone-600 focus:border-red-400" />
+                  )}
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button type="submit" className="rounded-2xl bg-red-600 px-6 py-3 font-black text-white transition hover:bg-red-500">Save Entry</button>
+              <button type="button" onClick={() => setForm(makeBlank(fields))} className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-black text-white transition hover:bg-white/10">Clear Form</button>
+            </div>
+          </form>
+        );
+      }
+
+      function RecordTable({ config, records, onDelete }) {
+        return (
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 print:border-black/10 print:bg-white">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[820px] border-collapse text-left">
+                <thead className="bg-white/10 text-xs uppercase tracking-wider text-stone-300 print:bg-black/5 print:text-black">
+                  <tr>
+                    {config.columns.map((col) => <th key={col} className="px-5 py-4 font-black">{col}</th>)}
+                    <th className="px-5 py-4 font-black print:hidden">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {records.map((record) => (
+                    <tr key={record.id} className="border-t border-white/10 text-stone-300 print:border-black/10 print:text-black">
+                      {config.row(record).map((cell, index) => <td key={index} className="px-5 py-4 align-top">{cell || "—"}</td>)}
+                      <td className="px-5 py-4 print:hidden">
+                        <button onClick={() => onDelete(record.id)} className="rounded-xl border border-red-400/30 bg-red-950/40 px-3 py-2 text-sm font-black text-red-100 transition hover:bg-red-900/60">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      }
+
+      function Intro({ eyebrow, title, text }) {
+        return (
+          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-7 print:border-black/10 print:bg-white">
+            <p className="text-sm font-black uppercase tracking-[0.3em] text-red-200 print:text-red-800">{eyebrow}</p>
+            <h2 className="mt-2 text-4xl font-black text-white md:text-5xl print:text-black">{title}</h2>
+            <p className="mt-4 max-w-3xl leading-8 text-stone-300 print:text-black">{text}</p>
+          </section>
+        );
+      }
+
+      function InfoPanel({ title, items }) {
+        return (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 print:border-black/10 print:bg-white">
+            <h3 className="text-2xl font-black text-white print:text-black">{title}</h3>
+            <ul className="mt-4 grid gap-3">
+              {items.map((item) => <li key={item} className="rounded-2xl bg-black/25 px-4 py-3 text-sm text-stone-300 print:bg-black/5 print:text-black">{item}</li>)}
+            </ul>
+          </div>
+        );
+      }
+
+      function Badge({ value }) {
+        const style = {
+          High: "border-emerald-400/30 bg-emerald-500/15 text-emerald-200",
+          Stable: "border-blue-400/30 bg-blue-500/15 text-blue-200",
+          Low: "border-yellow-400/30 bg-yellow-500/15 text-yellow-200",
+          Medium: "border-yellow-400/30 bg-yellow-500/15 text-yellow-200",
+          Critical: "border-red-400/30 bg-red-500/15 text-red-200",
+        }[value] || "border-white/20 bg-white/10 text-white";
+
+        return <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black print:border-black/20 print:bg-white print:text-black ${style}`}>{value}</span>;
+      }
+
+      function Empty() {
+        return (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center print:border-black/10 print:bg-white">
+            <h3 className="text-2xl font-black text-white print:text-black">No records found</h3>
+            <p className="mt-2 text-stone-400 print:text-black">Add a new entry or change the search box.</p>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<MedicalDepartmentWebsite />);
